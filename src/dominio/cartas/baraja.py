@@ -4,6 +4,8 @@ from .cartas import Carta, Numero, Palo
 from random import shuffle
 
 class Baraja:
+
+    # CARTAS: propiedad interna (se puede acceder a ella mediante alguno de los métodos de vistas)
     _cartas: list[Carta]
 
     def __init__(self) -> None:
@@ -14,6 +16,7 @@ class Baraja:
             for palo in Palo
             for numero in Numero
         ]
+        # Cada una de las cartas es un elemento único, se crean al construir la baraja, y no se crean ni destruyen a lo largo de la vida de la baraja. 
 
     # Para evitar que se modifique la lista de cartas desde fuera, devolvemos una tupla que es solo de lectura
     @property

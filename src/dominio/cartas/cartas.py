@@ -1,13 +1,13 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from enum import Enum, IntEnum
+from enum import Enum, IntEnum, auto
 
 # Palos de la baraja española
-class Palo(str, Enum): 
-    OROS = "oros"
-    COPAS = "copas"
-    ESPADAS = "espadas"
-    BASTOS = "bastos"
+class Palo(Enum): 
+    OROS = auto()
+    COPAS = auto()
+    ESPADAS = auto()
+    BASTOS = auto()
 
 # Números de la baraja española
 class Numero(IntEnum):
@@ -25,7 +25,6 @@ class Numero(IntEnum):
 @dataclass(frozen=True, slots=True)
 # Frozen (cartas inmutables, no se pueden modificar después de crear)
 # Slots (optimización de memoria, no se pueden agregar atributos dinámicamente)
-
 class Carta:
     numero: Numero      
     palo: Palo
