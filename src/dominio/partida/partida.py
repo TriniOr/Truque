@@ -27,7 +27,14 @@ class Partida:
         self.baraja = Baraja()
         self.baraja.barajar()
 
-        #TODO: Validar número de jugadores y ordenamiento de equipos
+        if len(jugadores) % 2 != 0:
+            raise ValueError("Tiene que haber un número par de jugadores.")
+        
+        if equipos is not None and len(equipos) != len(jugadores):
+            raise ValueError("La lista de equipos tiene que tener un elemento por jugador.")
+        
+        if equipos is not None and sum(equipos) != len(jugadores) // 2:
+            raise ValueError("Tiene que haber el mismo número de jugadores en cada equipo.")
 
         if equipos is None:
             # Si no se especifica el reparto de equipos, se intercalan.
@@ -69,14 +76,3 @@ class Partida:
             # Si hay ronda en curso, el jugador actual es el que tiene el turno.
             return jugadores[self.juego.ronda.jugadorActual]
         
-    def estado_juego(self, jugador_id: int = None) -> dict[str, Any]:
-
-        return {
-            "partida": {
-                "puntuación": {
-                    "partidas": self._puntuacion,
-                    "juegos": self.juego._puntuacion if self.juego else [0, 0],
-                    "ronda": "TBD",
-                }
-            }
-        }

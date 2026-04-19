@@ -3,6 +3,7 @@ from typing import Optional, Any, Callable
 
 from ...dominio import Partida, Jugador
 from .accionesTruque import AccionesTruque
+from .serializadorTruque import SerializadorTruque
 from .repartoTruque import RepartoTruque
 
 class Truque:
@@ -33,7 +34,7 @@ class Truque:
         # - Juego: cartas de jugadores, cartas en mesa, apuestas, guía, etc.
         # Se devuele la información disponible para cada jugador indicado.
         # Si no se indica un jugador, se devuelve la información completa del juego.
-        return self.partida.estado_juego(jugador_id)
+        return SerializadorTruque.estado_juego(self.partida, jugador_id)
     
     def ejecutar_accion(self, accion: str, jugador: int = None, **kwargs) -> Any:
         if accion not in self.acciones_disponibles(jugador):

@@ -25,11 +25,11 @@ class Jugador:
         return self._id
     
     # Las clases del jugador hacen de intermediarias entre la mano y el exterior.
-    def cartas(self) -> dict[str, Union[dict[int, Union[Carta, None]], list[Carta], str]]:
+    def estado(self, public: bool = False) -> dict[str, Union[dict[int, Union[Carta, None]], list[Carta], str]]:
         return {
             "name": self._nombre,
             "id": self._id,
-            **self._mano.estado(public = False),
+            **self._mano.estado(public = public),
         }
     
     # Método para recibir cartas, que delega en la mano.
