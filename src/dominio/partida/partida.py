@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 from ..cartas.baraja import Baraja
 from .juego import Juego
@@ -10,22 +10,22 @@ class Partida:
 
     # Baraja: baraja española de 40 cartas. 
     # Asumimos que se juega con una sola baraja.
-    _baraja: Baraja
+    baraja: Baraja
     # Equipos: asumimos que es un juego de dos equipos.
-    _equipos: list[Equipo]
+    equipos: list[Equipo]
     # Puntuación: lista con la puntuación de cada equipo.
     _puntuacion: list[int]
     # Juego: Dentro de cada partida se juegan varios juegos. 
     # Asumimos que la partida se compone en varios juegos. 
     #   Para un motor general de cartas, el conteo de la puntuación y la estructura del juego debería estar en la lógica del juego, y no en la estrucutra de las clases reutilizables.
     #   En este caso, reducimos el scope del proyecto a juegos similares a nivel de partida.
-    _juego: Juego | None
+    juego: Juego | None = None
 
     def __init__(self, jugadores: list[Jugador], equipos: Optional[list[bool]] = None) -> None:
         
         # Creamos baraja
-        self._baraja = Baraja()
-        self._baraja.barajar()
+        self.baraja = Baraja()
+        self.baraja.barajar()
 
         #TODO: Validar número de jugadores y ordenamiento de equipos
 
@@ -36,16 +36,47 @@ class Partida:
         # Creamos equipos (asumimos que el número de jugadores ya se ha validado antes de crear la partida)
         equipo1 = Equipo([jugador for jugador, enEquipo1 in zip(jugadores, equipos) if enEquipo1])
         equipo2 = Equipo([jugador for jugador, enEquipo1 in zip(jugadores, equipos) if not enEquipo1])
-        self._equipos = [equipo1, equipo2]
+        self.equipos = [equipo1, equipo2]
 
         # Inicializamos la puntuación a 0-0
         self._puntuacion = [0, 0]
 
     def iniciar_juego(self):
         # Iniciamos un nuevo juego dentro de la partida.
-        self._juego = Juego()
+        self.juego = Juego()
 
     def finalizar_juego(self, puntosPorEquipo: list[int]) -> None:
         # Las normas del juego son las encargadas de asignar la puntuación a cada equipo.
         self._puntuacion = [p + q for p, q in zip(self._puntuacion, puntosPorEquipo)]
-        self._juego = None
+        self.juego = None
+
+    def lista_jugadores(self) -> list[Jugador]:
+        # Devolvemos la lista de jugadores de la partida.
+        return [jugador for equipos in zip(self.equipos[0], self.equipos[1]) for jugador in equipos]
+
+    def siguiente_jugador(self) -> Jugador:
+        # Ver cual es el siguiente jugador en jugar, segun el orden de los equipos y el número de jugadores.
+        jugadores = self.lista_jugadores()
+        if self.juego is None:
+            # Si no hay juego en curso, en la ronda i empieza el jugador i (ciclicamente)
+            puntuación = sum(self._puntuacion)
+            return jugadores[puntuación % len(jugadores)]
+        elif self.juego.ronda is None:
+            # Si no hay ronda en curso, empieza el jugador j en la ronda j (ciclicamente)
+            puntuación = sum(self.juego._puntuacion)
+            return jugadores[puntuación % len(jugadores)]
+        else:   
+            # Si hay ronda en curso, el jugador actual es el que tiene el turno.
+            return jugadores[self.juego.ronda.jugadorActual]
+        
+    def estado_juego(self, jugador_id: int = None) -> dict[str, Any]:
+
+        return {
+            "partida": {
+                "puntuación": {
+                    "partidas": self._puntuacion,
+                    "juegos": self.juego._puntuacion if self.juego else [0, 0],
+                    "ronda": "TBD",
+                }
+            }
+        }
