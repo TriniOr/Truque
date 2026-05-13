@@ -1,7 +1,7 @@
 # Truque
 
-Proyecto en Python para modelar un juego de cartas tradicional con baraja española,
-dos equipos y `n` jugadores por equipo. El objetivo es practicar diseño de clases,
+Trabajo de fin de grado dde Ingeniería Informática,  para modelar un juego de cartas tradicional con baraja española,
+dos equipos y `n` jugadores por equipo, en Python. El objetivo es practicar diseño de clases,
 tipado estático y buenas prácticas.
 
 ## Requisitos
