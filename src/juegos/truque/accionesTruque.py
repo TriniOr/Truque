@@ -1,6 +1,7 @@
 from typing import Tuple
 
 from ...dominio import Partida
+from .funcionesTruque import FuncionesTruque
 
 class AccionesTruque:
     # Permite determinar para un estado de partida, que acciones están disponibles.
@@ -31,7 +32,7 @@ class AccionesTruque:
         # == Acciones durante la ronda ==
 
         # Si no hay cartas repartidas, se pueden repartir.
-        if all(len(jugador.cartas) == 0 for jugador in partida.lista_jugadores()):
+        if all(len(getattr(jugador.estado(public=False), "cartas_en_mano", {})) == 0 for jugador in partida.lista_jugadores()):
             return [(None, "repartir_cartas"), (None, "apostar_pares")]
         
         # Desde aquí en adelante, hay una ronda en curso. 

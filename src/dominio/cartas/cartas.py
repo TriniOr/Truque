@@ -30,4 +30,4 @@ class Carta:
     palo: Palo
 
     def __str__(self) -> str:
-        return f"{self.numero.name.lower()} de {self.palo.value}"
+        return f"{self.numero.name.lower()} de {self.palo.name.lower()}"

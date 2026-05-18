@@ -20,7 +20,7 @@ class Ronda:
 
     def poner_guia(self, carta: Carta):
         # Método para poner la guía sobre la mesa.
-        self.guía = carta
+        self.guia = carta
 
     def devolver_guia(self) -> Carta:
         # Método para devolver la guía a la mano del jugador.

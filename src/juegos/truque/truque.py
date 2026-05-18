@@ -16,6 +16,8 @@ class Truque:
     # Estas acciones se llaman a través del método ejecutar_accion, pero se mapean a través de la variable acciones.
     _acciones: dict[str, Callable[[Partida, Any], Any]] = {
         "iniciar_juego": lambda partida, **kwargs: RepartoTruque.iniciar_juego(partida),
+        "iniciar_ronda": lambda partida, **kwargs: RepartoTruque.iniciar_ronda(partida),
+        "repartir_cartas": lambda partida, **kwargs: RepartoTruque.repartir_cartas(partida),
     }
 
     def __init__(self, nombres: list[str], equipos: Optional[list[bool]] = None) -> None:

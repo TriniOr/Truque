@@ -61,18 +61,5 @@ class Partida:
         # Devolvemos la lista de jugadores de la partida.
         return [jugador for equipos in zip(self.equipos[0], self.equipos[1]) for jugador in equipos]
 
-    def siguiente_jugador(self) -> Jugador:
-        # Ver cual es el siguiente jugador en jugar, segun el orden de los equipos y el número de jugadores.
-        jugadores = self.lista_jugadores()
-        if self.juego is None:
-            # Si no hay juego en curso, en la ronda i empieza el jugador i (ciclicamente)
-            puntuación = sum(self._puntuacion)
-            return jugadores[puntuación % len(jugadores)]
-        elif self.juego.ronda is None:
-            # Si no hay ronda en curso, empieza el jugador j en la ronda j (ciclicamente)
-            puntuación = sum(self.juego._puntuacion)
-            return jugadores[puntuación % len(jugadores)]
-        else:   
-            # Si hay ronda en curso, el jugador actual es el que tiene el turno.
-            return jugadores[self.juego.ronda.jugadorActual]
+
         

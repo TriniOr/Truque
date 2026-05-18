@@ -21,7 +21,7 @@ class Mano:
         self._estado_de_cartas = []
         self._max_cartas = nCartas if nCartas is not None else 3
         
-    def cartas_en_mano(self, public: bool = True) -> dict[int, Union[dict, None]]:
+    def cartas_en_mano(self, public: bool = True) -> dict[int, Union[Carta, None]]:
         # Devolvemos diccionario con todas las cartas en la mano:
         # clave: índice de la carta en la mano
         # valor: carta o none
@@ -32,10 +32,10 @@ class Mano:
             if estado == 0
         }
 
-    def cartas_en_mesa(self) -> list[dict]:
+    def cartas_en_mesa(self) -> list[Carta]:
         # Devolvemos lista  todas las cartas en la mesa, ordenadas por el orden que se han echado
         return [
-            f"{carta}" for carta, estado in 
+            carta for carta, estado in 
             sorted(
                 zip(self._cartas, self._estado_de_cartas),
                 key=lambda pair: pair[1] # Ordenamos por el estado de la carta
@@ -43,7 +43,7 @@ class Mano:
             if estado > 0
         ]
 
-    def estado(self, public: bool = True) -> dict[str, Union[dict[int, Union[dict, None]], list[dict]]]:
+    def estado(self, public: bool = True) -> dict[str, Union[dict[int, Union[Carta, None]], list[Carta]]]:
         # Devolvemos un diccionario con el estado de la mano de un jugador
         return {
             "cartas_en_mano": self.cartas_en_mano(public = public),
