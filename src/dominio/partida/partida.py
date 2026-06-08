@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Optional, Tuple
 
 from ..cartas.baraja import Baraja
 from .juego import Juego
@@ -14,7 +14,7 @@ class Partida:
     # Equipos: asumimos que es un juego de dos equipos.
     equipos: list[Equipo]
     # Puntuación: lista con la puntuación de cada equipo.
-    _puntuacion: list[int]
+    puntuacion: list[int]
     # Juego: Dentro de cada partida se juegan varios juegos. 
     # Asumimos que la partida se compone en varios juegos. 
     #   Para un motor general de cartas, el conteo de la puntuación y la estructura del juego debería estar en la lógica del juego, y no en la estrucutra de las clases reutilizables.
@@ -41,12 +41,12 @@ class Partida:
             equipos = [i % 2 == 0 for i in range(len(jugadores))]
 
         # Creamos equipos (asumimos que el número de jugadores ya se ha validado antes de crear la partida)
-        equipo1 = Equipo([jugador for jugador, enEquipo1 in zip(jugadores, equipos) if enEquipo1])
-        equipo2 = Equipo([jugador for jugador, enEquipo1 in zip(jugadores, equipos) if not enEquipo1])
+        equipo1 = Equipo([jugador for jugador, enEquipo1 in zip(jugadores, equipos) if enEquipo1], 1)
+        equipo2 = Equipo([jugador for jugador, enEquipo1 in zip(jugadores, equipos) if not enEquipo1], 2)
         self.equipos = [equipo1, equipo2]
 
         # Inicializamos la puntuación a 0-0
-        self._puntuacion = [0, 0]
+        self.puntuacion = [0, 0]
 
     def iniciar_juego(self):
         # Iniciamos un nuevo juego dentro de la partida.
@@ -54,12 +54,26 @@ class Partida:
 
     def finalizar_juego(self, puntosPorEquipo: list[int]) -> None:
         # Las normas del juego son las encargadas de asignar la puntuación a cada equipo.
-        self._puntuacion = [p + q for p, q in zip(self._puntuacion, puntosPorEquipo)]
+        self.puntuacion = [p + q for p, q in zip(self.puntuacion, puntosPorEquipo)]
         self.juego = None
 
     def lista_jugadores(self) -> list[Jugador]:
         # Devolvemos la lista de jugadores de la partida.
         return [jugador for equipos in zip(self.equipos[0], self.equipos[1]) for jugador in equipos]
+    
+    def jugador_por_id(self, jugador_id: int) -> Tuple[Jugador, int]:
+        # Devolvemos el jugador con el ID especificado y su índice en la lista de jugadores.
+        for i, jugador in enumerate(self.lista_jugadores()):
+            if jugador.id == jugador_id:
+                return jugador, i
+        raise ValueError(f"Jugador con id {jugador_id} no encontrado.")
+
+    def equipo_jugador(self, jugador_id: int) -> int:
+        # Devuelve el número de equipo al que pertenece un jugador.
+        for i, equipo in enumerate(self.equipos):
+            if any(jugador.id == jugador_id for jugador in equipo.jugadores):
+                return i
+        raise ValueError(f"Jugador con id {jugador_id} no encontrado en ningún equipo.")
 
 
         

@@ -1,5 +1,7 @@
 from typing import Optional
 
+from src.dominio.personas.jugador import Jugador
+
 from ..cartas.cartas import Carta
 
 class Ronda:
@@ -10,13 +12,11 @@ class Ronda:
     # Guía: carta sobre la mesa que establece la guía.
     guia: Optional[Carta] = None
 
-    jugadorActual: Optional[int] = None
+    mano: Optional[Jugador] = None
 
-    def nueva_ronda(self):
+    def __init__(self, jugador: Jugador = None):
         # Iniciamos una nueva ronda dentro del juego.
-        self.estado = None
-        self.guia = None
-        self.jugadorActual = None
+        self.mano = jugador
 
     def poner_guia(self, carta: Carta):
         # Método para poner la guía sobre la mesa.
@@ -28,10 +28,5 @@ class Ronda:
         self.guia = None
         return guia
 
-    def actualizar_estado(self, estado: any) -> None:
-        # Método para actualizar el estado de la ronda.
-        self.estado = estado
 
-    def actualizar_jugador_actual(self, jugadorActual: int) -> None:
-        # Método para actualizar el jugador actual.
-        self.jugadorActual = jugadorActual
+
