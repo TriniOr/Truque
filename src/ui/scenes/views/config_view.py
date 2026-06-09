@@ -64,14 +64,27 @@ class ConfigView(BaseView):
                     ))
             return
         
-        # Caso recuento de puntos
+        # Caso terminar juego (puntuación mayor a 31, en ningun caso los dos equipos suman más de 31 a la vez (se cuenta antes pares))
         if len([accion for accion, jugador, opciones in acciones 
-                if jugador == -1 and accion in ["terminar_ronda"]]) > 0:
+                if jugador == -1 and accion in ["terminar_juego"]]) > 0:
             
             self.botones.append(Button(
                 rect=((WINDOW_SIZE[0] - BUTTON_W) // 2, (WINDOW_SIZE[1] - BUTTON_H) // 2, BUTTON_W, BUTTON_H),
-                label="Terminar Ronda",
-                on_click=lambda: self._ejecutar("terminar_ronda"),
+                label="Terminar Juego",
+                on_click=lambda: self._ejecutar("terminar_juego"),
+            ))
+
+            return
+        
+        
+        # Caso terminar juego (puntuación mayor a 31, en ningun caso los dos equipos suman más de 31 a la vez (se cuenta antes pares))
+        if len([accion for accion, jugador, opciones in acciones 
+                if jugador == -1 and accion in ["terminar_partida"]]) > 0:
+            
+            self.botones.append(Button(
+                rect=((WINDOW_SIZE[0] - BUTTON_W) // 2, (WINDOW_SIZE[1] - BUTTON_H) // 2, BUTTON_W, BUTTON_H),
+                label="Terminar Partida",
+                on_click=lambda: self.app.set_view("nueva_partida"),
             ))
 
             # Plantear si mostrar pantalla con recuento de puntos

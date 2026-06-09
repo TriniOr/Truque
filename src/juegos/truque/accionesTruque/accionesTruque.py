@@ -14,18 +14,14 @@ class AccionesTruque:
     def acciones_disponibles(partida: Partida) -> list[Tuple[str, int, dict | None]]:
 
         # == Inicio y final de juego ==
-
+        
         # Terminar partida (se ha alcanzado la puntuación máxima)
         if any(p >= 3 for p in partida.puntuacion):
-            return [("finalizar_partida", -1, None)]
+            return [("terminar_partida", -1, None)]
 
         # Iniciar juego (no hay juego en curso)
         if partida.juego is None:
             return [("iniciar_juego", -1, None)]
-        
-        # Terminar juego (se ha alcanzado la puntuación máxima)
-        if any(p >= 31 for p in partida.juego.puntuacion):
-            return [("terminar_juego", -1, None)]
         
         # Iniciar ronda (no hay ronda en curso)
         if partida.juego.ronda is None:
@@ -42,16 +38,20 @@ class AccionesTruque:
         estado: EstadoTruque = partida.juego.ronda.estado 
         apuesta_maxima = 31 - max(partida.juego.puntuacion)
 
+        # Contar puntos: fin de la partida, se han jugado las 3 cartas, no se ha querido la apuesta de truque 
+        # o un equipo ha ganado al menos 2 manos.
+        if estado.ronda_ganada():
+            return [("contar_puntos", -1, None)]
+        
+        # Terminar juego (se ha alcanzado la puntuación máxima). Lo ponemos aquí abajo para contar puntos antes de terminar el juego!
+        if any(p >= 31 for p in partida.juego.puntuacion):
+            return [("terminar_juego", -1, None)]
+
         # Si no hay cartas repartidas, se pueden repartir.
         if all(len(jugador.cartas()) == 0 for jugador in partida.lista_jugadores()):
             return [("repartir_cartas", -1, None)] + (
                 [("apostar_pares", jugador.id, {"apuesta": {"min": 2, "max": apuesta_maxima, "default": 2}}) for jugador in partida.lista_jugadores()] 
                 if estado.pares is None else [])
-
-        # Contar puntos: fin de la partida, se han jugado las 3 cartas, no se ha querido la apuesta de truque 
-        # o un equipo ha ganado al menos 2 manos.
-        if estado.ronda_ganada():
-            return [("contar_puntos", -1, None)]
         
         # Si uno de los equipos está a 30 puntos(a 1 punto de ganar), se hace ronda al cantar.
         if any(p == 30 for p in partida.juego.puntuacion):
@@ -66,7 +66,7 @@ class AccionesTruque:
         if estado.pares is not None and estado.pares.abierta:
             acciones.append(("querer_pares", estado.jugador.id, None))
             acciones.append(("rechazar_pares", estado.jugador.id, None))
-            if estado.pares.apuesta < 31:
+            if estado.pares.apuesta < apuesta_maxima:
                 acciones.append(("subir_pares", estado.jugador.id, {"apuesta": {"min": estado.pares.apuesta + 1, "max": apuesta_maxima, "default": estado.pares.apuesta + 1}}))
 
             # Si el jugador tiene flor, puede cantar flor y cancelar la fase de apuesta de pares
@@ -91,7 +91,7 @@ class AccionesTruque:
         if estado.flor is not None and estado.flor.abierta:
             acciones.append(("querer_flor", estado.jugador.id, None))
             acciones.append(("rechazar_flor", estado.jugador.id, None))
-            if estado.flor.apuesta < 31:
+            if estado.flor.apuesta < apuesta_maxima//3+1:
                 acciones.append(("subir_flor", estado.jugador.id, {"apuesta": {"min": estado.flor.apuesta//3+1, "max": apuesta_maxima//3+1, "default": estado.flor.apuesta//3+1}}))
             return acciones
         

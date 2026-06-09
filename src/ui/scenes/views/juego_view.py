@@ -368,6 +368,7 @@ class JuegoView(BaseView):
 
         terminar_ronda = [accion for accion in self.acciones if accion[0] in ["repartir_cartas", "terminar_juego"] and accion[1] == -1]
         if len(terminar_ronda) > 0:
+            print(self.acciones)
             self.app.set_view("config")
             return
 
@@ -405,6 +406,7 @@ class JuegoView(BaseView):
             botones.draw(surface)
             
         if self.fase == "recuento" and self.accion_respuesta["accion"]["apuestas"]:
+            print(self.accion_respuesta)
             if "pares" in self.accion_respuesta["accion"]["apuestas"].keys():
                 self.draw_label(surface, 
                     "Puntos de pares:", 
@@ -419,6 +421,7 @@ class JuegoView(BaseView):
                     f"+ {reservadas//3} reservada{"s" if reservadas > 3 else " "}: {reservadas}",
                     pos=(0.3*WINDOW_SIZE[0] + 40,  0.7*WINDOW_SIZE[1] + 40),
                     color=COLOR_EQUIPO1 if self.accion_respuesta["accion"]["apuestas"]["pares"]["equipo"] == 1 else COLOR_EQUIPO2)
+                    
             if "flor" in self.accion_respuesta["accion"]["apuestas"].keys():
                 self.draw_label(surface, 
                     "Puntos de flor:", 
@@ -433,12 +436,14 @@ class JuegoView(BaseView):
                     f"+ {puntos_flores//3} flor{"es" if puntos_flores > 3 else ""}:       {puntos_flores}",
                     pos=(0.3*WINDOW_SIZE[0] + 40,  0.7*WINDOW_SIZE[1] + 40),
                     color=COLOR_EQUIPO1 if self.accion_respuesta["accion"]["apuestas"]["flor"]["equipo"] == 1 else COLOR_EQUIPO2)
-            self.draw_label(surface, 
-                "Puntos de truque:", 
-                pos=(0.3*WINDOW_SIZE[0], 0.7*WINDOW_SIZE[1] + 100))  
-            self.draw_label(surface, 
-                f"{self.accion_respuesta["accion"]["apuestas"]["truque"]["puntos"]}",
-                pos=(0.3*WINDOW_SIZE[0] + 275,  0.7*WINDOW_SIZE[1] + 100),
-                color=COLOR_EQUIPO1 if self.accion_respuesta["accion"]["apuestas"]["truque"]["equipo"] == 1 else COLOR_EQUIPO2) 
+                    
+            if "truque" in self.accion_respuesta["accion"]["apuestas"].keys():
+                self.draw_label(surface, 
+                    "Puntos de truque:", 
+                    pos=(0.3*WINDOW_SIZE[0], 0.7*WINDOW_SIZE[1] + 100))  
+                self.draw_label(surface, 
+                    f"{self.accion_respuesta["accion"]["apuestas"]["truque"]["puntos"]}",
+                    pos=(0.3*WINDOW_SIZE[0] + 275,  0.7*WINDOW_SIZE[1] + 100),
+                    color=COLOR_EQUIPO1 if self.accion_respuesta["accion"]["apuestas"]["truque"]["equipo"] == 1 else COLOR_EQUIPO2) 
                 
         

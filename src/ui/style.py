@@ -13,9 +13,11 @@ COLOR_HOVER      = (60,60,60)
 COLOR_SELECTED   = (0,30,60)
 COLOR_FORBIDDEN  = (120,120,120)
 COLOR_TEXT       = (255, 255, 255)
+COLOR_TEXT_HIGH  = (130, 255, 200)
 COLOR_TEXT_DIM   = (160, 160, 160)
 COLOR_EQUIPO1    = (255, 150, 150)
 COLOR_EQUIPO2    = (150, 150, 255)
+COLOR_MANO       = (200, 170, 50)
 
 # --- Tamaños de fuente ---
 FONT_SM = 16
@@ -28,6 +30,7 @@ WINDOW_SIZE      = (1920, 1080)
 PADDING          = 20
 BUTTON_H         = 48
 BUTTON_W         = 350
+LINE_H           = 60
 
 # --- Cartas ---
 CARD_SIZE       = (73, 113)

@@ -65,7 +65,7 @@ class MesaCartas:
         if self.mano:
             cx = self.pos[0] - 10
             cy = label_y + self.font_size // 2 - 10
-            pygame.draw.circle(surface, (200, 170, 50), (cx, cy), 7)   # ficha dorada
+            pygame.draw.circle(surface, COLOR_MANO, (cx, cy), 7)   # ficha dorada
             pygame.draw.circle(surface, (255, 255, 255), (cx, cy), 7, width=2)  # borde blanco
 
         if self.flor:

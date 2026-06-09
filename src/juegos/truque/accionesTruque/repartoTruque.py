@@ -177,3 +177,22 @@ class RepartoTruque:
         return {
             "accion": "terminar_ronda"
             }
+    
+
+    @staticmethod
+    def terminar_juego(partida: Partida) -> dict[str,any]:
+        
+        # Al menos uno de los dos equipos tiene que tener 31 puntos
+        if not any([puntos > 30 for puntos in partida.juego.puntuacion]):
+            raise ValueError("No se puede terminar juego si ninguno de los equipos ha llegado a 31 puntos")
+        
+        # Marcamos al equipo ganador y le sumamos un punto
+        equipo_ganador = partida.juego.puntuacion.index(max(partida.juego.puntuacion))
+        partida.puntuacion[equipo_ganador] = partida.puntuacion[equipo_ganador] + 1
+
+        # Eliminamos el juego para iniciar otro
+        partida.juego = None
+        return {
+            "accion": "terminar_juego",
+            "equipo_ganador": equipo_ganador + 1
+        }

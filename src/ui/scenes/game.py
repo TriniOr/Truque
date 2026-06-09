@@ -4,15 +4,20 @@ from src.juegos.truque import Truque
 from src.ui.style import *
 from src.ui.scenes.views.config_view import ConfigView
 from src.ui.scenes.views.juego_view import JuegoView
+from src.ui.normas import NORMAS
+from src.ui.components.normas import PanelNormas
 
 class GameScene(BaseScene):
     def __init__(self, app, truque: Truque):
         super().__init__(app)
         self.truque: Truque = truque
         self.view = ConfigView(self, self.truque)
+        self.panel_normas = PanelNormas(NORMAS)
 
     def handle_event(self, event):
         self.view.handle_event(event)
+        self.panel_normas.handle_event(event)
+
 
     def update(self, dt):
         self.view.update(dt)
@@ -22,11 +27,15 @@ class GameScene(BaseScene):
             self.view = ConfigView(self, self.truque)
         elif view == "juego":
             self.view = JuegoView(self, self.truque, siguiente_jugador)
+        elif view == "new_game":
+            from src.ui.scenes.menu import MenuScene
+            self.app.change_scene(MenuScene(self.app))
 
     def draw(self, surface):
         surface.fill(COLOR_BG)
         self._draw_marcador(surface)
         self.view.draw(surface)
+        self.panel_normas.draw(surface)
 
     def _draw_marcador(self, surface):
         p_partidas = self.truque.partida.puntuacion
@@ -80,3 +89,4 @@ class GameScene(BaseScene):
                                 color= (COLOR_EQUIPO1 if apuestas['truque']['equipo'] == 1 else COLOR_EQUIPO2)
                                 if apuestas['truque']['estado'] == "ganada" else COLOR_TEXT
                                 )
+                
