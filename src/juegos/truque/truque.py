@@ -15,6 +15,9 @@ class Truque:
     # El truque funciona como una fachada que permite gestionar las acciones sobre la partida.
     partida: Partida
 
+    # diccionario para guardar información sobre la partida (comentarios de jugadores, etc)
+    memoria: dict
+
     # Todas las acciones están almacenadas en distintos módulos. 
     # Estas acciones se llaman a través del método ejecutar_accion, pero se mapean a través de la variable acciones.
     _acciones: dict[str, Callable[[Partida, Any], Any]] = {
@@ -44,6 +47,7 @@ class Truque:
         # Creamos todos los jugadores y la partida.
         jugadores = [Jugador(id, nombre, nCartas = 3) for id, nombre in enumerate(nombres)]
         self.partida = Partida(jugadores, equipos)
+        self.memoria = {}
 
     def acciones_disponibles(self, jugador_id: int = None) -> list[Tuple[str, int, dict | None]]:
         # Lista de acciones disponibles para un jugador específico.

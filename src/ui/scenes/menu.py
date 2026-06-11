@@ -50,21 +50,31 @@ class MenuScene(BaseScene):
         self.iniciar.draw(surface)
 
     def _build_slots(self, n):
-        self.slots_team1 = self._make_slots(n, x=500)
-        self.slots_team2 = self._make_slots(n, x=1000)
+        self.slots_team1 = self._make_slots(n, col = 1)
+        self.slots_team2 = self._make_slots(n, col = 2)
 
-    def _make_slots(self, n, x):
+    def _make_slots(self, n, col = 1):
         slots = []
         for i in range(n):
             y = 390 + i * 60
+            x = 500*col
             slots.append({
                 "type": CycleButton(rect=(x + 220, y, 140, 40), 
-                                    options=["Humano", "IA Facil", "IA Medio", "IA Dificil", "IA Experta"]),
+                                    options=["Humano", "IA Facil", "IA Medio", "IA Dificil", "IA Experta"],
+                                    initial= 0 if (i == 0 and col == 1) else 2), 
                 "name": TextInput(rect=(x, y, 200, 40), placeholder="Nombre")
             })
         return slots
 
     def _start_game(self):
-        truque = Truque([jugador["name"].text if jugador["name"].text != "" else random.choice(NOMBRES_PUEBLO)
-                          for equipos in zip(self.slots_team1, self.slots_team2) for jugador in equipos])
-        self.app.change_scene(GameScene(self.app, truque))
+
+        nombres_jugadores = []
+        tipo_jugador = []
+        for equipos in zip(self.slots_team1, self.slots_team2):
+            for jugador in equipos:
+                nombres_jugadores.append(jugador["name"].text if jugador["name"].text != "" else 
+                                         random.choice([nombre for nombre in NOMBRES_PUEBLO if nombre not in nombres_jugadores]))
+                tipo_jugador.append(jugador["type"].value)
+
+        truque = Truque(nombres_jugadores)
+        self.app.change_scene(GameScene(self.app, truque, tipo_jugador))

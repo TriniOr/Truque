@@ -4,6 +4,7 @@ from src.ui.scenes.views.base_view import BaseView
 from src.ui.components.button import Button
 from src.ui.components.mesa_cartas import MesaCartas
 from src.ui.components.number_selector import NumberSelector
+from src.ia import motor_ia
 from src.ui.style import * 
 
 POSICIONES_MESA = [(50, 50), (50, 20), (90, 35), (10, 35), (75, 50), (80, 20), (20, 20), (25, 50), (65, 20), (35, 20)]
@@ -16,9 +17,8 @@ POSICIONES_JUGADORES = {
 }
 
 class JuegoView(BaseView):
-    def __init__(self, app, truque: Truque, jugador_actual = -1):
-        self.app = app
-        self.truque:Truque = truque
+    def __init__(self, app, truque: Truque, tipo_jugador: str, jugador_actual = -1):
+        super().__init__(app, truque, tipo_jugador)
         self.jugador_actual = jugador_actual
         self.estado = self.truque.estado_juego(self.jugador_actual)["partida"]
         self.acciones = self.truque.acciones_disponibles()
@@ -27,7 +27,8 @@ class JuegoView(BaseView):
         
     
     def _construir_botones(self):
-        self.fase = "ganada" if (len([accion for accion in self.acciones if accion[0] == "contar_puntos" and accion[1] == -1]) > 0
+        self.fase = "ia" if (self.tipo_jugador[self.jugador_actual] != "Humano"
+                ) else "ganada" if (len([accion for accion in self.acciones if accion[0] == "contar_puntos" and accion[1] == -1]) > 0
                 ) else "recuento" if (len([accion for accion in self.acciones if accion[0] == "terminar_ronda" and accion[1] == -1]) > 0
                 ) else "pares" if (len(self.estado["apuestas"]["pares"]) > 0 and self.estado["apuestas"]["pares"]["estado"] == "abierta"
                 ) else "cante_flor" if (len(self.estado["apuestas"]["flor"]) > 0 and self.estado["apuestas"]["flor"]["estado"] == "cantando"
@@ -47,7 +48,8 @@ class JuegoView(BaseView):
             self.cartas_mano = [
                 CartaUI(
                     carta = carta,
-                    pos = ((0.42 + 0.08*idx)*WINDOW_SIZE[0], 0.7*WINDOW_SIZE[1]), 
+                    face_up = self.fase != "ia",
+                    pos = ((0.42 + 0.08*idx)*WINDOW_SIZE[0]-(CARD_SIZE_LG[0]/2), 0.7*WINDOW_SIZE[1]), 
                     size = "lg",
                     hover_color=CARD_HOVER if self.fase == "juego" else None,
                     on_click= lambda idx = idx: self._ejecutar("jugar_carta", 
@@ -60,37 +62,49 @@ class JuegoView(BaseView):
             self.cartas_mano = []
 
         jugadores = self.estado["jugadores"]
-        jugador_actual_idx = next(idx for idx, jugador in enumerate(jugadores.values()) if jugador['id'] == self.jugador_actual)
-        jugadores_ordenados = list(jugadores.values())
-        jugadores_ordenados = jugadores_ordenados[jugador_actual_idx:] + jugadores_ordenados[:jugador_actual_idx]
+        
+        # Si hay solo un jugador que controla el usuario y está la IA controlando, mantenemos las posiciones originales
+        fixed_view = self.tipo_jugador[self.jugador_actual] != "Humano" and sum(tipo == "Humano" for tipo in self.tipo_jugador) == 1
+        if fixed_view: 
+            posicion_humano_idx = next(idx for idx, tipo in enumerate(self.tipo_jugador) if tipo == "Humano")
+            jugadores_ordenados = list(jugadores.values())
+            jugadores_ordenados = jugadores_ordenados[posicion_humano_idx:] + jugadores_ordenados[:posicion_humano_idx]
+        else:
+            jugador_actual_idx = next(idx for idx, jugador in enumerate(jugadores.values()) if jugador['id'] == self.jugador_actual)
+            jugadores_ordenados = list(jugadores.values())
+            jugadores_ordenados = jugadores_ordenados[jugador_actual_idx:] + jugadores_ordenados[:jugador_actual_idx]
         posiciones = [POSICIONES_MESA[x-1] for x in POSICIONES_JUGADORES[len(jugadores_ordenados)]]
 
-        
         if self.fase != "recuento":
+            comentarios = self.truque.memoria.get("comentarios")
+            print("comentarios", comentarios)
             self.cartas_mesa = [
                 MesaCartas(
                     cartas=jugador["cartas_echadas"],
                     pos = (posiciones[idx][0]*WINDOW_SIZE[0]/100 - 50, posiciones[idx][1]*WINDOW_SIZE[1]/100 - 50),
                     nombre = jugador["name"],
-                    font_color=COLOR_EQUIPO1 if jugador["equipo"] == 1 else COLOR_EQUIPO2,
-                    seleccionadas = [i for i,x in enumerate(self.estado["mesa"]["reos"]) if x!=0 and x.id == jugador["id"]] if self.estado else [],
-                    mano = jugador['id'] == self.estado["jugador_mano"].id,
-                    comentario = self.estado["apuestas"]["comentarios"].get(jugador['id'], None) if self.estado["apuestas"] else None,
+                    font_color= (COLOR_EQUIPO1 if jugador["equipo"] == 1 else COLOR_EQUIPO2),
+                    font_size = FONT_LG if jugador['id'] == self.jugador_actual else FONT_MD,
+                    seleccionadas = [i for i,x in enumerate(self.estado["mesa"]["bazas"]) if x!=0 and x.id == jugador["id"]] if self.estado else [],
+                    mano = jugador['id'] == self.estado["jugador_mano"],
+                    comentario = comentarios["comentario"] if comentarios is not None and comentarios["jugador"] == jugador['id'] else (
+                        self.estado["apuestas"]["comentarios"].get(jugador['id'], None) if self.estado["apuestas"] else None),
                     flor = self.fase in ["flor", "cante_flor"] and jugador["id"] in self.estado["apuestas"]["flor"]["jugadores"])
                 for idx, jugador in enumerate(jugadores_ordenados)
             ]
         else:
+
             self.cartas_mesa = [
                 MesaCartas(
                     cartas=jugador.cartas() ,
                     pos = (posiciones[idx][0]*WINDOW_SIZE[0]/100 - 50, posiciones[idx][1]*WINDOW_SIZE[1]/100 - 50),
                     nombre = jugador.nombre,
                     font_color=COLOR_EQUIPO1 if jugador.equipo == 1 else COLOR_EQUIPO2,
-                    mano = jugador.id == self.estado["jugador_mano"].id)
+                    mano = jugador.id == self.estado["jugador_mano"])
                 for idx, jugador in enumerate(self.truque.partida.lista_jugadores())
             ]
 
-
+        self.botones = {}
         if self.fase == "pares":
             self._construir_botones_pares()
         elif self.fase == "cante_flor":
@@ -105,11 +119,14 @@ class JuegoView(BaseView):
             self._construir_ganada()
         elif self.fase == "recuento":
             self._construir_recuento()
+        elif self.fase == "ia":
+            self._construir_continuar(f = lambda: self._continuar_ia())
 
     def _construir_botones_juego(self):
         self.botones = {}
         apuesta_pares = [accion for accion in self.acciones if accion[0] == "apostar_pares" and accion[1] == self.jugador_actual]
         if len(apuesta_pares) > 0:
+
             apuesta_pares = apuesta_pares[0]
             self.botones["selector_pares"] = NumberSelector(
                 pos=(350, 0.7*WINDOW_SIZE[1]),
@@ -233,7 +250,6 @@ class JuegoView(BaseView):
             )
 
     def _construir_botones_flor(self):
-        self.botones = {}
         apostar_flor = [accion for accion in self.acciones if accion[0] == "apostar_flor" and accion[1] == self.jugador_actual]
         if len(apostar_flor) > 0:
             apostar_flor = apostar_flor[0]
@@ -356,9 +372,32 @@ class JuegoView(BaseView):
             label="Siguiente Ronda",
             on_click=lambda: self._ejecutar("terminar_ronda", -1)
             )      
+            
+    def _construir_continuar(self, f):
+        self.botones = {}
+        self.botones["continuar"] = Button(
+            rect = ((WINDOW_SIZE[0] - BUTTON_W) // 2, 700,  BUTTON_W, BUTTON_H),
+            label="Continuar",
+            on_click= f
+            )      
         
     def la_falta(self, boton):
         boton.value = boton.max_val
+    
+    def _continuar_ia(self):
+        accion, jugador_ia, kwargs, comentario = motor_ia.decidir(
+            self.tipo_jugador[self.jugador_actual],
+            self.truque.estado_juego(self.jugador_actual),
+            self.truque.acciones_disponibles(self.jugador_actual),
+            jugador=self.jugador_actual
+            )
+        self.truque.memoria["comentarios"] = {
+            "jugador": jugador_ia,
+            "comentario": comentario
+        } if comentario is not None else None
+        print(accion, comentario, self.truque.memoria)
+        self.truque.ejecutar_accion(accion, jugador_ia, **kwargs)
+        self.app.set_view("config")
 
     def _ejecutar(self, nombre, jugador = None, **kwargs):
         self.accion_respuesta = self.truque.ejecutar_accion(nombre, jugador, **kwargs) 
@@ -368,17 +407,14 @@ class JuegoView(BaseView):
 
         terminar_ronda = [accion for accion in self.acciones if accion[0] in ["repartir_cartas", "terminar_juego"] and accion[1] == -1]
         if len(terminar_ronda) > 0:
-            print(self.acciones)
             self.app.set_view("config")
             return
 
         siguiente_jugador = self.truque.estado_juego()["partida"]["siguiente_jugador"]  
         if self.jugador_actual == siguiente_jugador or self.fase == "ganada":
             self._construir_botones()
-        elif siguiente_jugador == -1:
-            self.app.set_view("config")
         else:
-            self.app.set_view("juego", siguiente_jugador)
+            self.app.set_view("config")
             
 
     def handle_event(self, event): 
@@ -406,7 +442,7 @@ class JuegoView(BaseView):
             botones.draw(surface)
             
         if self.fase == "recuento" and self.accion_respuesta["accion"]["apuestas"]:
-            print(self.accion_respuesta)
+            
             if "pares" in self.accion_respuesta["accion"]["apuestas"].keys():
                 self.draw_label(surface, 
                     "Puntos de pares:", 

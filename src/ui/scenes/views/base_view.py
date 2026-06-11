@@ -3,9 +3,10 @@ from src.ui.style import *
 
 
 class BaseView:
-    def __init__(self, app, truque: Truque):
+    def __init__(self, app, truque: Truque, tipo_jugador: str):
         self.app = app
-        self.truque:Truque = truque
+        self.truque: Truque = truque
+        self.tipo_jugador = tipo_jugador
 
     def handle_event(self, event): pass
     def update(self, dt): pass

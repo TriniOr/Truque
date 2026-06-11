@@ -8,10 +8,11 @@ from src.ui.normas import NORMAS
 from src.ui.components.normas import PanelNormas
 
 class GameScene(BaseScene):
-    def __init__(self, app, truque: Truque):
+    def __init__(self, app, truque: Truque, tipo_jugador):
         super().__init__(app)
         self.truque: Truque = truque
-        self.view = ConfigView(self, self.truque)
+        self.tipo_jugador = tipo_jugador
+        self.view = ConfigView(self, self.truque, tipo_jugador)
         self.panel_normas = PanelNormas(NORMAS)
 
     def handle_event(self, event):
@@ -24,9 +25,11 @@ class GameScene(BaseScene):
 
     def set_view(self, view:str, siguiente_jugador = -1):
         if view == "config":
-            self.view = ConfigView(self, self.truque)
+            self.view = ConfigView(self, self.truque, self.tipo_jugador)
+            
         elif view == "juego":
-            self.view = JuegoView(self, self.truque, siguiente_jugador)
+            self.view = JuegoView(self, self.truque, self.tipo_jugador, siguiente_jugador)
+            
         elif view == "new_game":
             from src.ui.scenes.menu import MenuScene
             self.app.change_scene(MenuScene(self.app))

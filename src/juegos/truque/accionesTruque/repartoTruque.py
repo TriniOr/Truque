@@ -140,8 +140,8 @@ class RepartoTruque:
 
             #2b: Apuesta querida o no se ha llegado a apostar, vemos que equipo ha ganado
             else: 
-                equipo_reos = [jugador.equipo for jugador in estado.reos if jugador != 0]
-                equipo_idx = sum(equipo == 2 for equipo in equipo_reos) > sum(equipo == 1 for equipo in equipo_reos) + 1
+                equipo_bazas = [jugador.equipo for jugador in estado.bazas if jugador != 0]
+                equipo_idx = sum(equipo == 2 for equipo in equipo_bazas) > sum(equipo == 1 for equipo in equipo_bazas) + 1
 
             # Calculamos la puntuación de la apuesta y sumamos
             puntos[equipo_idx] = puntos[equipo_idx] + (estado.truque.apuesta if estado.truque is not None else 1)

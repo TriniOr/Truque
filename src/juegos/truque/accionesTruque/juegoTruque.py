@@ -20,7 +20,7 @@ class JuegoTruque:
         cartas_echadas = [jugador.carta_echada_en_ronda(estado.ronda) for jugador in jugadores]
 
         # Si ha habido pata, vemos las cartas echadas como si fueran ronda 2
-        if estado.ronda == 3 and estado.reos[0] == 0:
+        if estado.ronda == 3 and estado.bazas[0] == 0:
             cartas_echadas = [jugador.carta_echada_en_ronda(2) for jugador in jugadores]
 
 
@@ -41,7 +41,7 @@ class JuegoTruque:
                     pata = True
                 else:
                     # Si no, el mejor jugador es el que tiene la mejor carta. En caso de empate es el jugador del equipo que haya ganado la primera mano
-                    jugador_ganador_reo1, idx = partida.jugador_por_id(estado.reos[0].id)
+                    jugador_ganador_reo1, idx = partida.jugador_por_id(estado.bazas[0].id)
                     equipo_gandaor_reo1 = partida.equipos[jugador_ganador_reo1.equipo-1].jugadores
                     mejores_cartas_equipo_reo1 = [index for index in mejores_cartas_index if jugadores[index].id in equipo_gandaor_reo1]
                     mejor_jugador = jugadores[mejores_cartas_equipo_reo1[0]] if len(mejores_cartas_equipo_reo1) > 0 else jugadores[mejores_cartas_index[0]]

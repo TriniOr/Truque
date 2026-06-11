@@ -151,7 +151,7 @@ class EstadoTruque:
         self.pares = None
         self.truque = None
         self.flor = None
-        self.reos: Jugador | int = [0,0,0]
+        self.bazas: Jugador | int = [0,0,0]
 
     # Jugador: el siguiente jugador que tiene una accion, ya sea _jugador_siguiente en fase de apuestas 
     # o _jugador_original en fase de juego. 
@@ -165,12 +165,12 @@ class EstadoTruque:
         self._jugador_original = jugador
         if nueva_ronda:
             if pata and self.ronda == 1:
-                self.reos[0] = 0 #Pata hay que echar la mejor carta arriba
-                self.reos[1] = 0
+                self.bazas[0] = 0 #Pata hay que echar la mejor carta arriba
+                self.bazas[1] = 0
                 self.ronda = 3
                 ("Pata")
             else:
-                self.reos[self.ronda-1] = jugador
+                self.bazas[self.ronda-1] = jugador
                 self.ronda = self.ronda+1
 
     # Actualizar el siguiente jugador en la fase de apuestas.
@@ -204,9 +204,9 @@ class EstadoTruque:
         # Si se ha querido el truque
         if self.truque is not None and not self.truque.abierta and not self.truque.querida:
             return True
-        # Si un equipo ya ha ganado 2 reos
-        equipo_reos = [jugador.equipo for jugador in self.reos if jugador != 0]
-        if sum(equipo == 1 for equipo in equipo_reos)>1 or sum(equipo == 2 for equipo in equipo_reos)>1:
+        # Si un equipo ya ha ganado 2 bazas
+        equipo_bazas = [jugador.equipo for jugador in self.bazas if jugador != 0]
+        if sum(equipo == 1 for equipo in equipo_bazas)>1 or sum(equipo == 2 for equipo in equipo_bazas)>1:
             
             return True
         return False

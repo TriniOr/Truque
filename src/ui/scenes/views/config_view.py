@@ -6,13 +6,17 @@ from src.ui.components.button import Button
 from src.ui.style import *
 
 class ConfigView(BaseView):
-    def __init__(self, app, truque: Truque):
-        super().__init__(app, truque)
+    def __init__(self, app, truque: Truque, tipo_jugador: str):
+        super().__init__(app, truque, tipo_jugador)
         self.jugador_actual = -1
         self.botones = []
+        self._pending_view = None
+        self._ejecutar_ia = False
         self._construir_botones()
 
     def _construir_botones(self):
+        self._pending_view = None
+        self._ejecutar_ia = False
         self.botones = []
         acciones = self.truque.acciones_disponibles()
 
@@ -86,14 +90,35 @@ class ConfigView(BaseView):
                 label="Terminar Partida",
                 on_click=lambda: self.app.set_view("nueva_partida"),
             ))
-
-            # Plantear si mostrar pantalla con recuento de puntos
             
             return
-
-        # Si no es ninguno de los casos anteriores, pasamos a la pantalla de juego
+        
+        # Por último, si estamos en ronda de partida, si el jugador es un usuario ponemos su pantalla
         siguiente_jugador = self.truque.estado_juego().get("partida").get("siguiente_jugador")
-        self.app.set_view("juego", siguiente_jugador)
+        if self.tipo_jugador[siguiente_jugador] == "Humano":
+            
+
+            # Si hay más de un jugador controlados por el usuario, ponemos una pantalla intermedia para confirmar el cambio de jugador
+            if sum([j == "Humano" for j in self.tipo_jugador]) > 1:
+
+                # Botón para confirmar cambio de jugador
+            
+                self.botones.append(Button(
+                    rect=((WINDOW_SIZE[0] - BUTTON_W) // 2, (WINDOW_SIZE[1] - BUTTON_H) // 2, BUTTON_W, BUTTON_H),
+                    label=f"Turno de {self.truque.partida.jugador_por_id(siguiente_jugador)[0].nombre}",
+                    on_click=lambda siguiente_jugador = siguiente_jugador: self.app.set_view("juego", siguiente_jugador),
+                ))
+                return
+            
+            # Si hay uno solo, pasamos a la pantalla directamente
+            else:
+                self._pending_view = ("juego", siguiente_jugador)
+                return
+
+        # Para los jugadores controlados por la IA, redirigimos las acciones disponibles a la IA
+        else:
+            self._pending_view = ("juego", siguiente_jugador)
+            return
 
     def _ejecutar(self, nombre, jugador = None, **kwargs):
         self.truque.ejecutar_accion(nombre, jugador, **kwargs)    
@@ -104,6 +129,12 @@ class ConfigView(BaseView):
             btn.handle_event(event)
 
     def update(self, dt):
+        if self._pending_view is not None:
+            view, jugador = self._pending_view
+            self._pending_view = None
+            self.app.set_view(view, jugador) if jugador is not None else self.app.set_view(view)
+            return
+        
         mouse_pos = pygame.mouse.get_pos()
         for btn in self.botones:
             btn.update(mouse_pos)

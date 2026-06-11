@@ -61,11 +61,14 @@ class PuntosTruque:
         return 0
 
     @staticmethod
-    def mejor_carta(cartas: list[Carta], guia: Carta, mano: int) -> tuple[list[int], list[Carta]]:
+    def mejor_carta(cartas: list[Carta], guia: Carta, mano: int = 0) -> tuple[list[int], list[Carta]]:
 
         mejor_carta = 0
         idxs = []
 
+        if len(cartas) == 0:
+            return [],[]
+        
         # Devuelve el índice de la mejor carta, y la carta. Lo recorremos en el orden de la mano
         for carta in cartas[mano:]+cartas[:mano]:
             valor = PuntosTruque.valor_carta_truque(carta, guia)
@@ -80,3 +83,9 @@ class PuntosTruque:
                 idxs.append(cartas.index(carta))
 
         return idxs, [cartas[idx] for idx in idxs]
+    
+    @staticmethod
+    def ordenar_cartas(cartas: list[Carta], guia: Carta, mano: int = 0) -> tuple[list[Carta]]:
+        cartas = cartas[mano:]+cartas[:mano]
+        cartas_ordenadas = cartas.sort(key=lambda carta: PuntosTruque.valor_carta_truque(carta, guia))
+        return cartas_ordenadas if cartas_ordenadas is not None > 0 else cartas

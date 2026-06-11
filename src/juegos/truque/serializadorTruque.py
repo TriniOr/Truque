@@ -104,10 +104,10 @@ class SerializadorTruque:
                 },
                 "siguiente_jugador": estado_ronda.jugador.id if estado_ronda and estado_ronda.jugador else 
                         EstadoTruque.siguiente_mano(partida).id,
-                "jugador_mano": partida.juego.ronda.mano if partida.juego and partida.juego.ronda and partida.juego.ronda.mano else {},
+                "jugador_mano": partida.juego.ronda.mano.id if partida.juego and partida.juego.ronda and partida.juego.ronda.mano else {},
                 "mesa": {
                     "guía": partida.juego.ronda.guia if partida.juego and partida.juego.ronda and partida.juego.ronda.guia else {},
-                    "reos": estado_ronda.reos if estado_ronda else {}
+                    "bazas": estado_ronda.bazas if estado_ronda else {}
                 }, 
                 "apuestas": SerializadorTruque.apuestas(partida),
         }}
