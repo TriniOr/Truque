@@ -361,7 +361,7 @@ def _calcular_pesos(estado: dict, acciones: list, jugador:int, dificultad:int) -
                 # con media en valor medio, y un sigma tal que la distribución valga 0.01 en apuesta_maxima
                 # Para el valor de apuesta maxima, buscamos un valor entre 2 y 10, y entre 30 (pares) y 72 
                 apuesta_maxima = mapear(puntos_flor, 
-                                        min_in=42, max_on=70,
+                                        min_in=42, max_in=70,
                                         min_out=valor_medio, max_out=valor_medio + 2)
                 sigma = (apuesta_maxima - valor_medio) / 2.33
                 valor = _samplear_apuesta(min_v, max_v, valor_medio, sigma)
