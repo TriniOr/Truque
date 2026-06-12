@@ -40,14 +40,17 @@ class Truque:
         "apostar_flor": lambda partida, jugador, **kwargs: FlorTruque.apostar_flor(partida, jugador, kwargs.get("apuesta", None)),
         "rechazar_flor": lambda partida, jugador, **kwargs: FlorTruque.rechazar_flor(partida, jugador),
         "querer_flor": lambda partida, jugador, **kwargs: FlorTruque.querer_flor(partida, jugador),
-        "subir_flor": lambda partida, jugador, **kwargs: FlorTruque.subir_flor(partida, jugador, kwargs.get("apuesta", None)),
+        "rechazar_flor": lambda partida, jugador, **kwargs: FlorTruque.subir_flor(partida, jugador, kwargs.get("apuesta", None)),
     }
 
     def __init__(self, nombres: list[str], equipos: Optional[list[bool]] = None) -> None:
         # Creamos todos los jugadores y la partida.
         jugadores = [Jugador(id, nombre, nCartas = 3) for id, nombre in enumerate(nombres)]
         self.partida = Partida(jugadores, equipos)
-        self.memoria = {}
+        self.memoria = {
+            "acciones" : [],
+            "comentarios": None
+        }
 
     def acciones_disponibles(self, jugador_id: int = None) -> list[Tuple[str, int, dict | None]]:
         # Lista de acciones disponibles para un jugador específico.

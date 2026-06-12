@@ -27,9 +27,9 @@ class JuegoView(BaseView):
         
     
     def _construir_botones(self):
-        self.fase = "ia" if (self.tipo_jugador[self.jugador_actual] != "Humano"
-                ) else "ganada" if (len([accion for accion in self.acciones if accion[0] == "contar_puntos" and accion[1] == -1]) > 0
+        self.fase = "ganada" if (len([accion for accion in self.acciones if accion[0] == "contar_puntos" and accion[1] == -1]) > 0
                 ) else "recuento" if (len([accion for accion in self.acciones if accion[0] == "terminar_ronda" and accion[1] == -1]) > 0
+                ) else "ia" if (self.tipo_jugador[self.jugador_actual] != "Humano"
                 ) else "pares" if (len(self.estado["apuestas"]["pares"]) > 0 and self.estado["apuestas"]["pares"]["estado"] == "abierta"
                 ) else "cante_flor" if (len(self.estado["apuestas"]["flor"]) > 0 and self.estado["apuestas"]["flor"]["estado"] == "cantando"
                 ) else "flor" if (len(self.estado["apuestas"]["flor"]) > 0 and self.estado["apuestas"]["flor"]["estado"] == "abierta"
@@ -44,23 +44,6 @@ class JuegoView(BaseView):
         jugador = self.estado["jugadores"][self.jugador_actual]
         cartas_en_mano = jugador["cartas_en_mano"]
 
-        if self.fase != "recuento":
-            self.cartas_mano = [
-                CartaUI(
-                    carta = carta,
-                    face_up = self.fase != "ia",
-                    pos = ((0.42 + 0.08*idx)*WINDOW_SIZE[0]-(CARD_SIZE_LG[0]/2), 0.7*WINDOW_SIZE[1]), 
-                    size = "lg",
-                    hover_color=CARD_HOVER if self.fase == "juego" else None,
-                    on_click= lambda idx = idx: self._ejecutar("jugar_carta", 
-                                    jugador=self.jugador_actual, 
-                                    carta = idx) if self.fase == "juego" else None,
-                    )
-                for idx, carta in cartas_en_mano.items() if carta is not None
-            ]
-        else:
-            self.cartas_mano = []
-
         jugadores = self.estado["jugadores"]
         
         # Si hay solo un jugador que controla el usuario y está la IA controlando, mantenemos las posiciones originales
@@ -69,6 +52,8 @@ class JuegoView(BaseView):
             posicion_humano_idx = next(idx for idx, tipo in enumerate(self.tipo_jugador) if tipo == "Humano")
             jugadores_ordenados = list(jugadores.values())
             jugadores_ordenados = jugadores_ordenados[posicion_humano_idx:] + jugadores_ordenados[:posicion_humano_idx]
+            estado_jugador = self.truque.estado_juego(posicion_humano_idx)["partida"]
+            cartas_jugador = estado_jugador["jugadores"][posicion_humano_idx]["cartas_en_mano"]
         else:
             jugador_actual_idx = next(idx for idx, jugador in enumerate(jugadores.values()) if jugador['id'] == self.jugador_actual)
             jugadores_ordenados = list(jugadores.values())
@@ -76,8 +61,36 @@ class JuegoView(BaseView):
         posiciones = [POSICIONES_MESA[x-1] for x in POSICIONES_JUGADORES[len(jugadores_ordenados)]]
 
         if self.fase != "recuento":
+
+            if self.fase == "ia" and fixed_view:
+                self.cartas_mano = [
+                    CartaUI(
+                        carta = carta,
+                        pos = ((0.42 + 0.08*idx)*WINDOW_SIZE[0]-(CARD_SIZE_LG[0]/2), 0.7*WINDOW_SIZE[1]), 
+                        size = "lg"
+                        )
+                    for idx, carta in cartas_jugador.items() if carta is not None
+
+                ]
+            else:
+                self.cartas_mano = [
+                    CartaUI(
+                        carta = carta,
+                        face_up = self.fase != "ia",
+                        pos = ((0.42 + 0.08*idx)*WINDOW_SIZE[0]-(CARD_SIZE_LG[0]/2), 0.7*WINDOW_SIZE[1]), 
+                        size = "lg",
+                        hover_color=CARD_HOVER if self.fase == "juego" else None,
+                        on_click= lambda idx = idx: self._ejecutar("jugar_carta", 
+                                        jugador=self.jugador_actual, 
+                                        carta = idx) if self.fase == "juego" else None,
+                        )
+                    for idx, carta in cartas_en_mano.items() if carta is not None
+                ]
+        else:
+            self.cartas_mano = []
+
+        if self.fase != "recuento":
             comentarios = self.truque.memoria.get("comentarios")
-            print("comentarios", comentarios)
             self.cartas_mesa = [
                 MesaCartas(
                     cartas=jugador["cartas_echadas"],
@@ -358,6 +371,8 @@ class JuegoView(BaseView):
                 )
             
     def _construir_ganada(self):
+        self.truque.memoria["comentarios"] = None
+        self.truque.memoria["acciones"] = []
         self.botones = {}
         self.botones["contar_puntos"] = Button(
             rect = (20, 0.7*WINDOW_SIZE[1]+0*(PADDING+BUTTON_H), 300, BUTTON_H),
@@ -395,12 +410,14 @@ class JuegoView(BaseView):
             "jugador": jugador_ia,
             "comentario": comentario
         } if comentario is not None else None
-        print(accion, comentario, self.truque.memoria)
+        
         self.truque.ejecutar_accion(accion, jugador_ia, **kwargs)
         self.app.set_view("config")
 
     def _ejecutar(self, nombre, jugador = None, **kwargs):
         self.accion_respuesta = self.truque.ejecutar_accion(nombre, jugador, **kwargs) 
+
+        self.truque.memoria["acciones"].append(self.accion_respuesta)
         
         self.estado = self.truque.estado_juego(self.jugador_actual)["partida"]
         self.acciones = self.truque.acciones_disponibles()

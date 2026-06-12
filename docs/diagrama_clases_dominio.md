@@ -1,6 +1,6 @@
 # Diagrama de clases - Dominio (Truque)
 
-Diagrama de clases generado a partir de `src/dominio/`.
+Diagrama de clases de `src/dominio/`.
 
 ```mermaid
 classDiagram
