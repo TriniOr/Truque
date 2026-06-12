@@ -9,8 +9,8 @@ def decidir(dificultad: str, estado: dict, acciones: list, jugador: int) -> tupl
     DIFICULTADES = {
         "IA Facil":   0,
         "IA Medio":   1,
-        "IA Dificil": 2,
-        "IA Experto": 3,
+        "IA Dificil": 1, # 2 cuando esté implentado
+        "IA Experto": 1, # 3 cuando esté implentado
     }
     pesos = _calcular_pesos(estado, acciones, jugador, DIFICULTADES[dificultad])
     
